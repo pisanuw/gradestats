@@ -8,15 +8,12 @@ if __name__ == '__main__':
 
 
 from flask import Flask, render_template, request
-import io
-import random
-import statistics
 from flask import Response
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
+from grades import is_int, data_into_buckets, get_dist_stats
 
 app = Flask(__name__)
 
@@ -63,55 +60,6 @@ def create_bar_plot():
     # fig.suptitle("Course Number")
     return fig
 
-
-def get_dist_stats(data):
-    intData = [int(x) for x in data if isInt(x)]
-    stdevA = "0"
-    if len(intData) > 1:
-        stdevA = str(round(statistics.stdev(intData), 1))
-    textstr = '\n' . join((
-        "Total: " + str(len(data)),
-        "Mean: " + str(round(statistics.mean(intData), 1)),
-        "Median: " + str(round(statistics.median(intData), 1)),
-        "Mode: " + str(round(statistics.mode(intData), 1)),
-        "Stdev: " + stdevA,
-        "Min: " + str(round(min(intData), 1)),
-        "Max: " + str(round(max(intData), 1)),
-        "Dist: [" + ", ".join([str(x) for x in data_into_buckets(data)]) + "]"
-    ))
-    return textstr
-
-
-def data_into_buckets(data):
-    buckets = [0, 0, 0, 0, 0, 0, 0]
-    # ["<50", "50-59", "60-69", "70-79", "80-89", ">=90", "NaN"]
-    for grade in data:
-        if not isInt(grade):
-            buckets[6] = buckets[6] + 1
-            continue
-        else:
-            grade = int(grade)
-        if grade < 50:
-            buckets[0] = buckets[0] + 1
-        elif grade < 60:
-            buckets[1] = buckets[1] + 1
-        elif grade < 70:
-            buckets[2] = buckets[2] + 1
-        elif grade < 80:
-            buckets[3] = buckets[3] + 1
-        elif grade < 90:
-            buckets[4] = buckets[4] + 1
-        else:
-            buckets[5] = buckets[5] + 1
-    return buckets
-
-
-def isInt(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
 
 
 if __name__ == '__main__':
